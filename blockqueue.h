@@ -6,50 +6,50 @@
 class Mutex
 {
 public:
-	Mutex();
+    Mutex();
 
-	~Mutex();
+    ~Mutex();
 
-	void Lock();
+    void Lock();
 
-	void Unlock();
+    void Unlock();
 private:
-	struct Internal;
-	Internal* internal_;
+    struct Internal;
+    Internal* internal_;
 };
 
 class MutexLock
 {
 public:
-	explicit MutexLock(Mutex *mu) : mu_(mu) { mu_->Lock(); }
-	~MutexLock() { mu_->Unlock(); }
+    explicit MutexLock(Mutex *mu) : mu_(mu) { mu_->Lock(); }
+    ~MutexLock() { mu_->Unlock(); }
 private:
-	Mutex *const mu_;
+    Mutex *const mu_;
 };
 
 class DeferUnLock
 {
 public:
-	explicit DeferUnLock(Mutex *mu) : mu_(mu) {}
-	~DeferUnLock() { mu_->Unlock(); }
+    explicit DeferUnLock(Mutex *mu) : mu_(mu) {}
+    ~DeferUnLock() { mu_->Unlock(); }
 private:
-	Mutex *const mu_;
+    Mutex *const mu_;
 };
 
 // Just event
 class ConditionVariable
 {
 public:
-	ConditionVariable();
+    ConditionVariable();
 
-	~ConditionVariable();
+    ~ConditionVariable();
 
-	void notify_one();
+    void notify_one();
 
-	void wait();
+    void wait();
 private:
-	struct Internal;
-	Internal* internal_;
+    struct Internal;
+    Internal* internal_;
 };
 
 
@@ -59,33 +59,33 @@ class BlockQueue
 {
 public:
 
-	void Put(T value)
-	{
-		MutexLock lg(&mtx_);
-		queue_.push(value);
-		cond_.notify_one();
-	}
+    void Put(T value)
+    {
+        MutexLock lg(&mtx_);
+        queue_.push(value);
+        cond_.notify_one();
+    }
 
-	T Take()
-	{
-		for (;;)
-		{
-			mtx_.Lock();
-			if (!queue_.empty())
-				break;
-			mtx_.Unlock();
-			cond_.wait();
-		}
-		DeferUnLock dul(&mtx_);
-		T rtn = queue_.front();
-		queue_.pop();
-		return rtn;
-	}
+    T Take()
+    {
+        for (;;)
+        {
+            mtx_.Lock();
+            if (!queue_.empty())
+                break;
+            mtx_.Unlock();
+            cond_.wait();
+        }
+        DeferUnLock dul(&mtx_);
+        T rtn = queue_.front();
+        queue_.pop();
+        return rtn;
+    }
 
 private:
-	Mutex mtx_;
-	ConditionVariable cond_;
-	std::queue<T>  queue_;
+    Mutex mtx_;
+    ConditionVariable cond_;
+    std::queue<T>  queue_;
 };
 
 

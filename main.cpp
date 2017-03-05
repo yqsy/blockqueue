@@ -10,8 +10,8 @@
 
 struct Data
 {
-	std::string cust_no;
-	int time_stamp;
+    std::string cust_no;
+    int time_stamp;
 };
 
 
@@ -24,55 +24,55 @@ Mutex all_sum_mtx;
 
 bool IsComplete()
 {
-	MutexLock lg(&all_sum_mtx);
-	if (all_sum == (no_producers * per_thread_nums))
-		return true;
-	all_sum++;
-	return false;
+    MutexLock lg(&all_sum_mtx);
+    if (all_sum == (no_producers * per_thread_nums))
+        return true;
+    all_sum++;
+    return false;
 }
 
 void producer(void* param)
 {
-	BlockQueue<Data>* bq = (BlockQueue<Data>*)param;
+    BlockQueue<Data>* bq = (BlockQueue<Data>*)param;
 
-	for (int i = 0; i < per_thread_nums; i++)
-	{
-		Data data;
-		data.cust_no = "100086";
-		data.time_stamp = (int)time(NULL);
-		bq->Put(data);
-		Sleep(10);
-	}
+    for (int i = 0; i < per_thread_nums; i++)
+    {
+        Data data;
+        data.cust_no = "100086";
+        data.time_stamp = (int)time(NULL);
+        bq->Put(data);
+        Sleep(10);
+    }
 }
 
 void consumer(void* param)
 {
-	BlockQueue<Data>* bq = (BlockQueue<Data>*)param;
-	for (;;)
-	{
-		if (IsComplete())
-			return;
-		Data data = bq->Take();
+    BlockQueue<Data>* bq = (BlockQueue<Data>*)param;
+    for (;;)
+    {
+        if (IsComplete())
+            return;
+        Data data = bq->Take();
 
-		std::printf("%s %d\n", data.cust_no.c_str(), data.time_stamp);
-	}
+        std::printf("%s %d\n", data.cust_no.c_str(), data.time_stamp);
+    }
 }
 
 int main()
 {
-	BlockQueue<Data> block_queue;
+    BlockQueue<Data> block_queue;
 
-	std::vector<HANDLE> handles;
+    std::vector<HANDLE> handles;
 
-	for (int i = 0; i < no_producers; i++)
-		handles.push_back((HANDLE)_beginthread(&producer, 0, &block_queue));
+    for (int i = 0; i < no_producers; i++)
+        handles.push_back((HANDLE)_beginthread(&producer, 0, &block_queue));
 
-	for (int i = 0; i < no_consumers; i++)
-		handles.push_back((HANDLE)_beginthread(&consumer, 0, &block_queue));
+    for (int i = 0; i < no_consumers; i++)
+        handles.push_back((HANDLE)_beginthread(&consumer, 0, &block_queue));
 
-	for (size_t i = 0; i < handles.size(); i++)
-		WaitForSingleObject(handles[i], INFINITE);
+    for (size_t i = 0; i < handles.size(); i++)
+        WaitForSingleObject(handles[i], INFINITE);
 
-	std::printf("%d test ok!", all_sum);
-	return 0;
+    std::printf("%d test ok!", all_sum);
+    return 0;
 }
