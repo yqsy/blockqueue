@@ -1,2 +1,2 @@
 ###说明
-工作需要,在老的操作系统,老的vc++上实现block queue.
+工作需要,在windows平台,vc6编译器上实现block queue.
